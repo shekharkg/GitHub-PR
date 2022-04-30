@@ -3,6 +3,7 @@ package com.shekharkg.githubpr
 import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
+import com.shekharkg.githubpr.model.NetworkResult
 
 class MainActivity : AppCompatActivity() {
 
@@ -19,9 +20,24 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun addObserver() {
-        viewModel.getPullRequest().observe(this){
-            it?.let { prs->
+        viewModel.getPullRequest().observe(this) {
+            it?.let { prs ->
                 Log.e(TAG, "PRS: pulled : ${prs.size}")
+            }
+        }
+
+
+        viewModel.getNetworkState().observe(this) {
+            when (it) {
+                is NetworkResult.Success -> {
+
+                }
+                is NetworkResult.Loading -> {
+
+                }
+                is NetworkResult.Error -> {
+
+                }
             }
         }
     }
