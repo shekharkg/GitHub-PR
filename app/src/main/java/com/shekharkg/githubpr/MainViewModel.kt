@@ -1,10 +1,10 @@
 package com.shekharkg.githubpr
 
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.shekharkg.githubpr.api.GitHubApiService
+import com.shekharkg.githubpr.model.NetworkResult
 import com.shekharkg.githubpr.model.PullRequest
 import com.shekharkg.githubpr.model.Repository
 import retrofit2.Call
@@ -20,28 +20,34 @@ class MainViewModel(private val apiService: GitHubApiService) : ViewModel() {
     private val _repositories: ArrayList<Repository> = ArrayList()
     private val _pullRequest: ArrayList<PullRequest> = ArrayList()
     private val _pullRequestLiveData: MutableLiveData<List<PullRequest>> = MutableLiveData()
-    private var pageNumber = 1
+    private var _pageNumber = 1
+    private var _apiCallsInProgress = 0
+    private var _networkState: MutableLiveData<NetworkResult> = MutableLiveData()
+
 
     init {
         fetchRepositories(GitHubUser)
     }
 
     fun getPullRequest(): LiveData<List<PullRequest>> = _pullRequestLiveData
+    fun getNetworkState(): LiveData<NetworkResult> = _networkState
 
     private fun fetchRepositories(user: String) {
-        Log.e(TAG, "Fetching REPO for: $user")
-        apiService.getRepository(user = user, page = pageNumber)
+        _apiCallsInProgress++
+        updateNetworkState(null)
+        apiService.getRepository(user = user, page = _pageNumber)
             .enqueue(object : Callback<List<Repository>> {
                 override fun onResponse(
                     call: Call<List<Repository>>,
                     response: Response<List<Repository>>
                 ) {
-                    Log.e(TAG, "Repos status : ${response.isSuccessful}")
+                    _apiCallsInProgress--
+
                     if (response.isSuccessful) {
-                        Log.e(TAG, "Repos count : ${response.body()?.size}")
+                        updateNetworkState(null)
                         response.body()?.let { repositories ->
                             if (repositories.size == 30) {
-                                pageNumber++
+                                _pageNumber++
                                 fetchRepositories(user)
                             }
 
@@ -52,11 +58,17 @@ class MainViewModel(private val apiService: GitHubApiService) : ViewModel() {
                                 }
                             }
                         }
+                    } else {
+                        response.errorBody()?.let {
+                            updateNetworkState(it.toString())
+                        } ?: updateNetworkState("Something went wrong")
+
                     }
                 }
 
                 override fun onFailure(call: Call<List<Repository>>, t: Throwable) {
-                    Log.e(TAG, t.toString())
+                    _apiCallsInProgress--
+                    updateNetworkState(t.toString())
                 }
 
             })
@@ -64,29 +76,49 @@ class MainViewModel(private val apiService: GitHubApiService) : ViewModel() {
 
 
     private fun fetchClosedPullRequests(user: String, repoName: String) {
-        Log.e(TAG, "Fetching PR : $user <> $repoName")
+        _apiCallsInProgress++
+        updateNetworkState(null)
         apiService.getClosedPrs(user, repoName).enqueue(object : Callback<List<PullRequest>> {
             override fun onResponse(
                 call: Call<List<PullRequest>>,
                 response: Response<List<PullRequest>>
             ) {
-                Log.e(TAG, "PR status : ${response.isSuccessful}")
+                _apiCallsInProgress--
+
                 if (response.isSuccessful) {
-                    Log.e(TAG, "PR count for Repo: $repoName is ${response.body()?.size}")
+                    updateNetworkState(null)
                     response.body()?.let {
                         for (pr in it) {
                             _pullRequest.add(pr)
                             _pullRequestLiveData.value = _pullRequest
                         }
                     }
+                } else {
+                    response.errorBody()?.let {
+                        updateNetworkState(it.toString())
+                    } ?: updateNetworkState("Something went wrong")
+
                 }
             }
 
             override fun onFailure(call: Call<List<PullRequest>>, t: Throwable) {
-                Log.e(TAG, t.toString())
+                _apiCallsInProgress--
+                updateNetworkState(t.toString())
             }
 
         })
+    }
+
+    private fun updateNetworkState(message: String?) {
+        if (_apiCallsInProgress == 0) {
+            if (message == null) {
+                _networkState.value = NetworkResult.Success()
+            } else {
+                _networkState.value = NetworkResult.Error(message)
+            }
+        } else if (_apiCallsInProgress > 0) {
+            _networkState.value = NetworkResult.Loading()
+        }
     }
 
 
