@@ -1,6 +1,7 @@
 package com.shekharkg.githubpr
 
 import android.os.Bundle
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 
 class MainActivity : AppCompatActivity() {
@@ -13,5 +14,15 @@ class MainActivity : AppCompatActivity() {
 
         val appContainer = (application as GitHubPR).appContainer
         viewModel = appContainer.getMainViewModel(this)
+
+        addObserver()
+    }
+
+    private fun addObserver() {
+        viewModel.getPullRequest().observe(this){
+            it?.let { prs->
+                Log.e(TAG, "PRS: pulled : ${prs.size}")
+            }
+        }
     }
 }
