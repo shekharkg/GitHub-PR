@@ -1,19 +1,30 @@
 package com.shekharkg.githubpr.manual_DI
 
-import android.content.Context
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import com.shekharkg.githubpr.MainViewModel
+import com.shekharkg.githubpr.api.Authenticator
 import com.shekharkg.githubpr.api.GitHubApiService
 import com.shekharkg.githubpr.factories.MainViewModelFactory
+import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 class AppContainer {
 
+    private val client = OkHttpClient.Builder()
+        .addInterceptor(
+            Authenticator(
+                Username = "shekharkg",
+                Password = "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"
+            )
+        )
+        .build()
+
     private val retrofit = Retrofit.Builder()
         .addConverterFactory(GsonConverterFactory.create())
         .baseUrl("https://api.github.com")
+        .client(client)
         .build()
         .create(GitHubApiService::class.java)
 
@@ -22,3 +33,4 @@ class AppContainer {
         ViewModelProvider(owner, MainViewModelFactory(retrofit)).get(MainViewModel::class.java)
 
 }
+
