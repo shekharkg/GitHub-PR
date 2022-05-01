@@ -16,7 +16,7 @@ class AppContainer {
         .addInterceptor(
             Authenticator(
                 username = "shekharkg",
-                password = "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"
+                password = "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"
             )
         )
         .build()
