@@ -10,6 +10,9 @@ import com.shekharkg.githubpr.model.Repository
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import java.text.SimpleDateFormat
+import java.util.*
+import kotlin.collections.ArrayList
 
 const val GitHubUser = "shekharkg"
 const val TAG = "GitHub_PR"
@@ -90,6 +93,8 @@ class MainViewModel(private val apiService: GitHubApiService) : ViewModel() {
                     updateNetworkState(null)
                     response.body()?.let {
                         for (pr in it) {
+                            pr.createdAt = formatDate(pr.createdAt!!)
+                            pr.closedAt = formatDate(pr.closedAt!!)
                             _pullRequest.add(pr)
                         }
 
@@ -123,6 +128,13 @@ class MainViewModel(private val apiService: GitHubApiService) : ViewModel() {
         } else if (_apiCallsInProgress > 0) {
             _networkState.value = NetworkResult.Loading()
         }
+    }
+
+    private fun formatDate(input: String): String {
+        val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.ENGLISH)
+        val inputDateTime = inputFormat.parse(input)
+        val outputFormat = SimpleDateFormat("MMM dd, yyyy h:mma", Locale.ENGLISH)
+        return outputFormat.format(inputDateTime)
     }
 
 
