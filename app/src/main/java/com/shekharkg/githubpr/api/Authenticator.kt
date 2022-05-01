@@ -1,15 +1,16 @@
 package com.shekharkg.githubpr.api
 
-import okhttp3.Credentials
 import okhttp3.Interceptor
 
-class Authenticator(Username: String, Password: String): Interceptor {
-    private var credentials: String = Credentials.basic(Username, Password)
+class Authenticator(private val username: String, private val password: String) : Interceptor {
+
 
     override fun intercept(chain: Interceptor.Chain): okhttp3.Response {
-        var request = chain.request()
-        request = request.newBuilder().header("Authorization", credentials).build()
+        val requestBuilder = chain.request().newBuilder()
 
-        return chain.proceed(request)
+        requestBuilder.addHeader("Username", username)
+        requestBuilder.addHeader("Password", password)
+
+        return chain.proceed(requestBuilder.build())
     }
 }

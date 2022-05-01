@@ -15,8 +15,8 @@ class AppContainer {
     private val client = OkHttpClient.Builder()
         .addInterceptor(
             Authenticator(
-                Username = "shekharkg",
-                Password = "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"
+                username = "shekharkg",
+                password = "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"
             )
         )
         .build()
