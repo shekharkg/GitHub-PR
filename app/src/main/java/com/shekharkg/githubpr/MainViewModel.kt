@@ -26,7 +26,7 @@ class MainViewModel(private val apiService: GitHubApiService) : ViewModel() {
 
 
     init {
-        fetchRepositories(GitHubUser)
+//        fetchRepositories(GitHubUser)
     }
 
     fun getPullRequest(): LiveData<List<PullRequest>> = _pullRequestLiveData
@@ -90,6 +90,9 @@ class MainViewModel(private val apiService: GitHubApiService) : ViewModel() {
                     response.body()?.let {
                         for (pr in it) {
                             _pullRequest.add(pr)
+                        }
+
+                        if(it.isNotEmpty()){
                             _pullRequestLiveData.value = _pullRequest
                         }
                     }
