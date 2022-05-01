@@ -26,13 +26,14 @@ class MainViewModel(private val apiService: GitHubApiService) : ViewModel() {
 
 
     init {
-//        fetchRepositories(GitHubUser)
+        fetchRepositories(GitHubUser)
     }
 
     fun getPullRequest(): LiveData<List<PullRequest>> = _pullRequestLiveData
     fun getNetworkState(): LiveData<NetworkResult> = _networkState
+    fun isApiCallInProgress(): Boolean = _apiCallsInProgress != 0
 
-    private fun fetchRepositories(user: String) {
+    fun fetchRepositories(user: String) {
         _apiCallsInProgress++
         updateNetworkState(null)
         apiService.getRepository(user = user, page = _pageNumber)
