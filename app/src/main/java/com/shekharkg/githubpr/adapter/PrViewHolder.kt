@@ -9,10 +9,10 @@ class PrViewHolder(private val binding: ItemPrBinding) : RecyclerView.ViewHolder
 
     fun onBind(pullRequest: PullRequest) {
         binding.titleTV.text = pullRequest.title
-        binding.createdAtTV.text = pullRequest.created_at
-        binding.closedAtTV.text = pullRequest.closed_at
+        binding.createdAtTV.text = pullRequest.createdAt
+        binding.closedAtTV.text = pullRequest.closedAt
 
-        binding.userNameTV.text = pullRequest.user?.login
+        binding.userNameTV.text = pullRequest.user?.name
 
     }
 

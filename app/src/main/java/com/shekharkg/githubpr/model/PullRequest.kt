@@ -1,13 +1,13 @@
 package com.shekharkg.githubpr.model
 
+import com.google.gson.annotations.SerializedName
+
 data class PullRequest(
     val title: String?,
-    val created_at: String?,
-    val closed_at: String?,
+    @SerializedName("created_at")
+    val createdAt: String?,
+    @SerializedName("closed_at")
+    val closedAt: String?,
     val user: RepoUser?
 )
 
-data class RepoUser(
-    val login: String?,
-    val avatar_url: String?
-)
